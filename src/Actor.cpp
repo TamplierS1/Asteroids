@@ -40,29 +40,52 @@ float& Actor::GetAccelY()
 	return mAccelerationY;
 }
 
-float& Actor::GetDirX()
+float Actor::GetDirX()
 {
 	return mDirX;
 }
 
-float& Actor::GetDirY()
+float Actor::GetDirY()
 {
 	return mDirY;
 }
 
+float Actor::GetAngle()
+{
+	return mAngle;
+}
+
+std::vector<float>& Actor::GetTransformedMatX()
+{
+	return mTransformedX;
+}
+
+std::vector<float>& Actor::GetTransformedMatY()
+{
+	return mTransformedY;
+}
+
 void Actor::Move(float deltaTime)
 {
-	mVelX = mAccelerationX * deltaTime + mVelX;
-	mVelY = mAccelerationY * deltaTime + mVelY;
+	mPosX += mVelX * deltaTime;
+	mPosY += mVelY * deltaTime;
 
-	mPosX = mVelX * mDirX * deltaTime + mPosX;
-	mPosY = mVelY * mDirY * deltaTime + mPosY;
+	//translate
+	for (int i = 0; i < 3; i++)
+	{
+		mTransformedX[i] += mPosX;
+		mTransformedY[i] += mPosY;
+	}
+}
 
-	/*float velocityX = mVelX * dirX * deltaTime;
-	float velocityY = mVelY * dirY * deltaTime;
-
-	mPosX += velocityX;
-	mPosY += velocityY;*/
+void Actor::Rotate(float deltaTime, RotationDir dir)
+{
+	//rotate
+	for (int i = 0; i < 3; i++)
+	{
+		mTransformedX[i] = mModelX[i] * cos(mAngle) - mModelY[i] * sin(mAngle);
+		mTransformedY[i] = mModelX[i] * sin(mAngle) + mModelY[i] * cos(mAngle);
+	}
 }
 
 Actor::Actor()

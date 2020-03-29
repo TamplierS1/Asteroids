@@ -1,8 +1,18 @@
 #pragma once
+
+#include <math.h>
+#include <vector>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+enum RotationDir
+{
+	LEFT = -1, RIGHT = 1
+};
+
 class Actor
 {
 public:
-
 	//utility functions
 	float& GetPosX();
 	float& GetPosY();
@@ -16,10 +26,16 @@ public:
 	float& GetAccelX();
 	float& GetAccelY();
 
-	float& GetDirX();
-	float& GetDirY();
+	float GetDirX();
+	float GetDirY();
+
+	float GetAngle();
+
+	std::vector<float>& GetTransformedMatX();
+	std::vector<float>& GetTransformedMatY();
 
 	void Move(float deltaTime);
+	void Rotate(float deltaTime, RotationDir dir);
 protected:
 	Actor();
 	float mPosX;
@@ -36,4 +52,12 @@ protected:
 
 	float mDirX;
 	float mDirY;
+
+	float mAngle;
+
+	std::vector<float> mModelX;
+	std::vector<float> mModelY;
+
+	std::vector<float> mTransformedX;
+	std::vector<float> mTransformedY;
 };

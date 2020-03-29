@@ -14,10 +14,20 @@ static float gDefaultPlayerSizeY = 30.0f;
 static float gDefaultPlayerAccelX = 10.0f;
 static float gDefaultPlayerAccelY = 10.0f;
 
+static float gDefaultPlayerRotationSpeed = 5.0f;
+
 class Ship : public Actor
 {
 public:
 	Ship();
-	Ship(float posx, float posy, float velx, float vely, float sizex, float sizey, float accelx, float accely);
+	Ship(float posx, float posy, float velx, float vely, float sizex, float sizey, float accelx, float accely, float rotSpeed);
+
+	void Thrust();
+	void ChangeRotation(RotationDir dir, float deltaTime);
+
+	float GetRotationSpeed();
+	RotationDir GetRotDir();
 private:
+	RotationDir mRotDir;
+	float mRotationSpeed;
 };
