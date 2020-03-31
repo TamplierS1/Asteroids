@@ -1,93 +1,121 @@
 #include "Actor.h"
 
-float& Actor::GetPosX()
+std::pair<float, float>& Actor::GetPos()
 {
-	return mPosX;
+	return mPos;
 }
 
-float& Actor::GetPosY()
+std::pair<float, float>& Actor::GetVelocity()
 {
-	return mPosY;
+	return mVelocity;
 }
 
-float& Actor::GetVelX()
+float& Actor::GetSize()
 {
-	return mVelX;
+	return mSize;
 }
 
-float& Actor::GetVelY()
+std::pair<float, float>& Actor::GetDirection()
 {
-	return mVelY;
+	return mDir;
 }
 
-float& Actor::GetSizeX()
-{
-	return mSizeX;
-}
-
-float& Actor::GetSizeY()
-{
-	return mSizeY;
-}
-
-float& Actor::GetAccelX()
-{
-	return mAccelerationX;
-}
-
-float& Actor::GetAccelY()
-{
-	return mAccelerationY;
-}
-
-float Actor::GetDirX()
-{
-	return mDirX;
-}
-
-float Actor::GetDirY()
-{
-	return mDirY;
-}
-
-float Actor::GetAngle()
+float& Actor::GetAngle()
 {
 	return mAngle;
 }
 
-std::vector<float>& Actor::GetTransformedMatX()
+std::pair<float, float> Actor::GetTransformedVertex(int number)
 {
-	return mTransformedX;
+	return mTransformedVertices[number];
 }
 
-std::vector<float>& Actor::GetTransformedMatY()
+unsigned int Actor::GetNumOfVerts()
 {
-	return mTransformedY;
+	return mNumOfVerts;
+}
+
+olc::Pixel Actor::GetColor() const
+{
+	return mColor;
 }
 
 void Actor::Move(float deltaTime)
 {
-	mPosX += mVelX * deltaTime;
-	mPosY += mVelY * deltaTime;
+	mPos.first += mVelocity.first * deltaTime;
+	mPos.second += mVelocity.second * deltaTime;
 
 	//translate
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < mNumOfVerts; i++)
 	{
-		mTransformedX[i] += mPosX;
-		mTransformedY[i] += mPosY;
+		mTransformedVertices[i].first += mPos.first;
+		mTransformedVertices[i].second += mPos.second;
 	}
 }
 
-void Actor::Rotate(float deltaTime, RotationDir dir)
+void Actor::Rotate(float deltaTime)
 {
 	//rotate
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < mNumOfVerts; i++)
 	{
-		mTransformedX[i] = mModelX[i] * cos(mAngle) - mModelY[i] * sin(mAngle);
-		mTransformedY[i] = mModelX[i] * sin(mAngle) + mModelY[i] * cos(mAngle);
+		mTransformedVertices[i].first = mModelVertices[i].first * cos(mAngle) - mModelVertices[i].second * sin(mAngle);
+		mTransformedVertices[i].second = mModelVertices[i].first * sin(mAngle) + mModelVertices[i].second * cos(mAngle);
+	}
+}
+
+void Actor::ChangeRotation(RotationDir dir, float deltaTime)
+{
+	mAngle += mRotationSpeed * dir * deltaTime;
+}
+
+void Actor::Scale(float amount)
+{
+	for (int i = 0; i < mNumOfVerts; i++)
+	{
+		mTransformedVertices[i].first *= amount;
+	}
+
+	for (int i = 0; i < mNumOfVerts; i++)
+	{
+		mTransformedVertices[i].second *= amount;
 	}
 }
 
 Actor::Actor()
 {
+}
+
+float Actor::GetRotationSpeed()
+{
+	return mRotationSpeed;
+}
+
+RotationDir Actor::GetRotDir()
+{
+	return mRotDir;
+}
+
+Actor::Actor(std::pair<float, float> pos, std::pair<float, float> velocity,
+	float size, unsigned int verts, RotationDir rotDir, float rotSpeed,
+	std::vector<std::pair<float, float>> modelVerts, olc::Pixel color)
+{
+	mNumOfVerts = verts;
+	mModelVertices = modelVerts;
+	mColor = color;
+	mPos = pos;
+	mVelocity = velocity;
+	mSize = size;
+	mDir = std::pair<float, float>(0.0f, 0.0f);
+
+	mAngle = 0.0f;
+	mRotationSpeed = rotSpeed;
+
+	for (int i = 0; i < mNumOfVerts; i++)
+	{
+		mTransformedVertices.push_back(std::pair<float, float>(0.0f, 0.0f));
+		mTransformedVertices[i].first += mPos.first;
+		mTransformedVertices[i].second += mPos.second;
+	}
+
+	mRotDir = RIGHT;
 }

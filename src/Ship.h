@@ -1,33 +1,30 @@
 #pragma once
 
 #include "Actor.h"
+#include "Bullet.h"
 
-static float gDefaultPlayerPosX = 0.0f;
-static float gDefaultPlayerPosY = 0.0f;
-
-static float gDefaultPlayerVelX = 100.0f;
-static float gDefaultPlayerVelY = 100.0f;
-
-static float gDefaultPlayerSizeX = 30.0f;
-static float gDefaultPlayerSizeY = 30.0f;
-
-static float gDefaultPlayerAccelX = 10.0f;
-static float gDefaultPlayerAccelY = 10.0f;
-
+static std::pair<float, float> gDefaultPlayerPos = std::pair<float, float>(0.0f, 0.0f);
+static std::pair<float, float> gDefaultPlayerVelocity = std::pair<float, float>(100.0f, 100.0f);
+static float gDefaultPlayerSize = 30.0f;
+static std::pair<float, float> gDefaultPlayerAcceleration = std::pair<float, float>(10.0f, 10.0f);
 static float gDefaultPlayerRotationSpeed = 5.0f;
 
 class Ship : public Actor
 {
 public:
 	Ship();
-	Ship(float posx, float posy, float velx, float vely, float sizex, float sizey, float accelx, float accely, float rotSpeed);
+	Ship(std::pair<float, float> pos, std::pair<float, float> velocity,
+		float size, std::pair<float, float> acceleration, float rotSpeed,
+		olc::Pixel color);
+
+	std::pair<float, float>& GetAcceleration();
+	std::vector<Bullet>& GetBullets();
 
 	void Thrust();
-	void ChangeRotation(RotationDir dir, float deltaTime);
-
-	float GetRotationSpeed();
-	RotationDir GetRotDir();
+	void FireBullet();
 private:
-	RotationDir mRotDir;
-	float mRotationSpeed;
+	std::vector<Bullet> mBullets;
+	std::pair<float, float> mAcceleration;
+
+	std::pair<float, float> mBulletVelocity;
 };

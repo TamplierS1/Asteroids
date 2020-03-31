@@ -2,62 +2,52 @@
 
 #include <math.h>
 #include <vector>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include "olcPixelGameEngine.h"
 
 enum RotationDir
 {
-	LEFT = -1, RIGHT = 1
+	LEFT = -1, RIGHT = 1, NONE = 0
 };
 
 class Actor
 {
 public:
+	Actor(std::pair<float, float> pos, std::pair<float, float> velocity,
+		float size, unsigned int verts, RotationDir rotDir, float rotSpeed,
+		std::vector<std::pair<float, float>> modelVerts, olc::Pixel color);
 	//utility functions
-	float& GetPosX();
-	float& GetPosY();
+	std::pair<float, float>& GetPos();
+	std::pair<float, float>& GetVelocity();
+	float& GetSize();
 
-	float& GetVelX();
-	float& GetVelY();
+	std::pair<float, float>& GetDirection();
+	float GetRotationSpeed();
+	RotationDir GetRotDir();
+	float& GetAngle();
+	std::pair<float, float> GetTransformedVertex(int number);
+	unsigned int GetNumOfVerts();
+	olc::Pixel GetColor() const;
 
-	float& GetSizeX();
-	float& GetSizeY();
+	virtual void Move(float deltaTime);
+	void Rotate(float deltaTime);
+	void ChangeRotation(RotationDir dir, float deltaTime);
+	void Scale(float amount);
 
-	float& GetAccelX();
-	float& GetAccelY();
-
-	float GetDirX();
-	float GetDirY();
-
-	float GetAngle();
-
-	std::vector<float>& GetTransformedMatX();
-	std::vector<float>& GetTransformedMatY();
-
-	void Move(float deltaTime);
-	void Rotate(float deltaTime, RotationDir dir);
 protected:
 	Actor();
-	float mPosX;
-	float mPosY;
 
-	float mVelX;
-	float mVelY;
+	std::pair<float, float> mPos;
+	std::pair<float, float> mVelocity;
+	float mSize;
+	std::pair<float, float> mDir;
 
-	float mSizeX;
-	float mSizeY;
+	std::vector<std::pair<float, float>> mTransformedVertices;
+	std::vector<std::pair<float, float>> mModelVertices;
+	unsigned int mNumOfVerts;
 
-	float mAccelerationX;
-	float mAccelerationY;
-
-	float mDirX;
-	float mDirY;
+	olc::Pixel mColor;
 
 	float mAngle;
-
-	std::vector<float> mModelX;
-	std::vector<float> mModelY;
-
-	std::vector<float> mTransformedX;
-	std::vector<float> mTransformedY;
+	float mRotationSpeed;
+	RotationDir mRotDir;
 };

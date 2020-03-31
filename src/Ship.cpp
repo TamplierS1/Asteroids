@@ -1,94 +1,80 @@
 #include "Ship.h"
 
-Ship::Ship()
+Ship::Ship() : Actor()
 {
-	mPosX = gDefaultPlayerPosX;
-	mPosY = gDefaultPlayerPosY;
-
-	mVelX = gDefaultPlayerVelX;
-	mVelY = gDefaultPlayerVelY;
-
-	mSizeX = gDefaultPlayerSizeX;
-	mSizeY = gDefaultPlayerSizeY;
-
-	mAccelerationX = gDefaultPlayerAccelX;
-	mAccelerationY = gDefaultPlayerAccelY;
-
-	mDirX = 0.0f;
-	mDirY = 0.0f;
+	mPos = gDefaultPlayerPos;
+	mVelocity = gDefaultPlayerVelocity;
+	mSize = gDefaultPlayerSize;
+	mAcceleration = gDefaultPlayerAcceleration;
+	mDir = std::pair<float, float>(0.0f, 0.0f);
+	mColor = olc::WHITE;
 
 	mAngle = 0.0f;
 	mRotationSpeed = gDefaultPlayerRotationSpeed;
 
-	mModelX = { 0.0f, -25.0f, +25.0f };
-	mModelY = { -55.0f, +25.0f, +25.0f };
+	mNumOfVerts = 3;
 
-	mTransformedX = { 0.0f, 0.0f, 0.0f };
-	mTransformedY = { 0.0f, 0.0f, 0.0f };
+	mModelVertices = { std::pair<float, float>(0.0f, -2.0f), std::pair<float, float>(-1.0f, +1.0f), std::pair<float, float>(+1.0f, +1.0f) };
 
-	//translate
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < mNumOfVerts; i++)
 	{
-		mTransformedX[i] += mPosX;
-		mTransformedY[i] += mPosY;
+		mTransformedVertices.push_back(std::pair<float, float>(0.0f, 0.0f));
+		mTransformedVertices[i].first += mPos.first;
+		mTransformedVertices[i].second += mPos.second;
 	}
 
+	mBulletVelocity = std::make_pair(250.0f, -250.0f);
 	mRotDir = RIGHT;
 }
 
-Ship::Ship(float posx, float posy, float velx, float vely, float sizex, float sizey, float accelx, float accely, float rotSpeed)
+Ship::Ship(std::pair<float, float> pos, std::pair<float, float> velocity,
+	float size, std::pair<float, float> acceleration, float rotSpeed,
+	olc::Pixel color)
 {
-	mPosX = posx;
-	mPosY = posy;
-
-	mVelX = velx;
-	mVelY = vely;
-
-	mSizeX = sizex;
-	mSizeY = sizey;
-
-	mAccelerationX = accelx;
-	mAccelerationY = accely;
-
-	mDirX = 0.0f;
-	mDirY = 0.0f;
+	mPos = pos;
+	mVelocity = velocity;
+	mSize = size;
+	mAcceleration = acceleration;
+	mDir = std::pair<float, float>(0.0f, 0.0f);
+	mColor = color;
 
 	mAngle = 0.0f;
 	mRotationSpeed = rotSpeed;
 
-	mModelX = { 0.0f, -25.0f, +25.0f };
-	mModelY = { -55.0f, +25.0f, +25.0f };
+	mNumOfVerts = 3;
 
-	mTransformedX = { 0.0f, 0.0f, 0.0f };
-	mTransformedY = { 0.0f, 0.0f, 0.0f };
+	mModelVertices = { std::pair<float, float>(0.0f, -2.0f), std::pair<float, float>(-1.0f, +1.0f), std::pair<float, float>(+1.0f, +1.0f) };
 
-	//translate
-	for (int i = 0; i < 3; i++)
+	mBulletVelocity = std::make_pair(350.0f, -350.0f);
+
+	for (int i = 0; i < mNumOfVerts; i++)
 	{
-		mTransformedX[i] += mPosX;
-		mTransformedY[i] += mPosY;
+		mTransformedVertices.push_back(std::pair<float, float>(0.0f, 0.0f));
+		mTransformedVertices[i].first += mPos.first;
+		mTransformedVertices[i].second += mPos.second;
 	}
 
 	mRotDir = RIGHT;
 }
 
+std::pair<float, float>& Ship::GetAcceleration()
+{
+	return mAcceleration;
+}
+
+std::vector<Bullet>& Ship::GetBullets()
+{
+	return mBullets;
+}
+
 void Ship::Thrust()
 {
-	mVelX += sin(mAngle) * mAccelerationX;
-	mVelY += -cos(mAngle) * mAccelerationY;
+	mVelocity.first += sin(mAngle) * mAcceleration.first;
+	mVelocity.second += -cos(mAngle) * mAcceleration.second;
 }
 
-void Ship::ChangeRotation(RotationDir dir, float deltaTime)
+void Ship::FireBullet()
 {
-	mAngle += mRotationSpeed * dir * deltaTime;
-}
-
-float Ship::GetRotationSpeed()
-{
-	return mRotationSpeed;
-}
-
-RotationDir Ship::GetRotDir()
-{
-	return mRotDir;
+	Bullet bullet(mPos, mBulletVelocity, mAngle, olc::WHITE);
+	mBullets.push_back(bullet);
 }

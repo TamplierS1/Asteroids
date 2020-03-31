@@ -140,6 +140,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Bullet.cpp" />
     <ClCompile Include="src\Actor.cpp" />
     <ClCompile Include="src\Ship.cpp" />
     <ClCompile Include="src\Asteroids.cpp" />
@@ -147,6 +148,7 @@
     <ClCompile Include="src\olcPixelGameEngine.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Bullet.h" />
     <ClInclude Include="src\Actor.h" />
     <ClInclude Include="src\Ship.h" />
     <ClInclude Include="src\Asteroids.h" />
