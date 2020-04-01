@@ -22,9 +22,13 @@ public:
 
 	void Thrust();
 	void FireBullet();
+
+	bool& IsDead();
 private:
 	std::vector<Bullet> mBullets;
 	std::pair<float, float> mAcceleration;
 
 	std::pair<float, float> mBulletVelocity;
+
+	bool mDead;
 };

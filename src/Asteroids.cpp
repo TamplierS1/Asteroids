@@ -15,23 +15,30 @@ Asteroids::Asteroids(unsigned int scrWidth, unsigned int scrHeight, unsigned int
 
 bool Asteroids::OnUserCreate()
 {
+	mMenu = { std::pair<float, float>(static_cast<float>(mScreenWidth) / 2.0f, static_cast<float>(mScreenHeight) / 2.0f),
+		std::pair<float, float>(40.0f, 15.0f),
+		std::pair<float, float>(static_cast<float>(mScreenWidth) / 2.0f, static_cast<float>(mScreenHeight) / 2.0f + 20.0f),
+		std::pair<float, float>(40.0f, 15.0f),
+		"Start",
+		"Exit" };
+
 	mShip = std::make_shared<Ship>(std::pair<float, float>(mScreenWidth / 4, mScreenHeight / 4),
 		std::pair<float, float>(50.0f, 50.0f), 16.0f, std::pair<float, float>(10.0f, 10.0f), 5.0f, olc::WHITE);
 
-	/*mShip = std::make_shared<Ship>(std::pair<float, float>(15.0f, 15.0f),
-		std::pair<float, float>(10.0f, 10.0f), std::pair<float, float>(15.0f, 15.0f), std::pair<float, float>(5.0f, 5.0f), 5.0f, olc::WHITE);*/
+	mState = MENU;
 
 	std::vector<std::pair<float, float>> astModel;
 	int astVerts = 10;
 	for (int i = 0; i < astVerts; i++)
 	{
-		float radius = 1.0f;
+		srand(time(NULL));
+		float radius = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 0.4 + 0.8f;
 		float a = ((float)i / (float)astVerts) * 6.28318;
 		astModel.push_back(std::pair<float, float>(radius * sin(a), radius * cos(a)));
 	}
 
-	std::shared_ptr<Actor> asteroid = std::make_shared<Actor>(std::pair<float, float>(100.0f, 100.0f), std::pair<float, float>(100.0f, 100.0f),
-		64.0f, 10, RIGHT, 5.0f, astModel, olc::RED);
+	std::shared_ptr<Actor> asteroid = std::make_shared<Actor>(std::pair<float, float>(100.0f, 100.0f), std::pair<float, float>(50.0f, 50.0f),
+		128.0f, 10, RIGHT, 5.0f, astModel, olc::YELLOW);
 
 	mAsteroids.push_back(asteroid);
 
@@ -44,95 +51,118 @@ bool Asteroids::OnUserUpdate(float fElapsedTime)
 
 	ProcessInput(fElapsedTime);
 
-	//update and draw ship
-	mShip->Rotate(fElapsedTime);
-	mShip->Scale(mShip->GetSize());
-	mShip->Move(fElapsedTime);
-
-	WrapCoordinates(mShip->GetPos().first, mShip->GetPos().second, mShip->GetPos().first, mShip->GetPos().second);
-	DrawActor(*mShip, mShip->GetColor());
-
-	//update asteroids
-	for (int i = 0; i < mAsteroids.size(); i++)
+	if (mState == ACTIVE)
 	{
-		mAsteroids[i]->Rotate(fElapsedTime);
-		mAsteroids[i]->Scale(mAsteroids[i]->GetSize());
-		mAsteroids[i]->Move(fElapsedTime);
-		WrapCoordinates(mAsteroids[i]->GetPos().first, mAsteroids[i]->GetPos().second, mAsteroids[i]->GetPos().first, mAsteroids[i]->GetPos().second);
-		DrawActor(*mAsteroids[i], mAsteroids[i]->GetColor());
-	}
+		//update and draw ship
+		mShip->Rotate(fElapsedTime);
+		mShip->Scale(mShip->GetSize());
+		mShip->Move(fElapsedTime);
 
-	//update and draw bullets
-	for (int i = 0; i < mShip->GetBullets().size(); i++)
-	{
-		Bullet* bullet = &mShip->GetBullets()[i];
+		WrapCoordinates(mShip->GetPos().first, mShip->GetPos().second, mShip->GetPos().first, mShip->GetPos().second);
+		DrawActor(*mShip, mShip->GetColor());
 
-		bullet->MoveBullet(fElapsedTime);
-
-		for (int j = 0; j < mAsteroids.size(); j++)
+		//update asteroids
+		for (int i = 0; i < mAsteroids.size(); i++)
 		{
-			//we pass GetSize().first because for an asteroid (a circle basically) GetSize().second is the same
-			if (CheckCollisions(mAsteroids[j]->GetPos(), mAsteroids[j]->GetSize(), bullet->GetPos()))
-			{
-				//we are moving bullet off screen to have it deleted later
-				bullet->GetPos().first = -100.0f;
+			mAsteroids[i]->GetAngle() += 0.5f * fElapsedTime;
+			mAsteroids[i]->Rotate(fElapsedTime);
+			mAsteroids[i]->Scale(mAsteroids[i]->GetSize());
+			mAsteroids[i]->Move(fElapsedTime);
+			WrapCoordinates(mAsteroids[i]->GetPos().first, mAsteroids[i]->GetPos().second, mAsteroids[i]->GetPos().first, mAsteroids[i]->GetPos().second);
+			DrawActor(*mAsteroids[i], mAsteroids[i]->GetColor());
 
-				if (mAsteroids[i]->GetSize() > 4)
+			if (CheckCollisions(mAsteroids[i]->GetPos(), mAsteroids[i]->GetSize(), mShip->GetPos()))
+			{
+				mShip->IsDead() = true;
+				mState = GAMEOVER;
+			}
+		}
+
+		//update and draw bullets
+		for (int i = 0; i < mShip->GetBullets().size(); i++)
+		{
+			Bullet* bullet = &mShip->GetBullets()[i];
+
+			bullet->MoveBullet(fElapsedTime);
+
+			for (int j = 0; j < mAsteroids.size(); j++)
+			{
+				//we pass GetSize().first because for an asteroid (a circle basically) GetSize().second is the same
+				if (CheckCollisions(mAsteroids[j]->GetPos(), mAsteroids[j]->GetSize(), bullet->GetPos()))
 				{
-					//create two half-sized child asteroids
+					mScore += 100;
+					//we are moving bullet off screen to have it deleted later
+					bullet->GetPos().first = -100.0f;
 
-					float angle1 = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 6.28321;
-					float angle2 = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 6.28321;
+					if (mAsteroids[j]->GetSize() > 32.0f)
+					{
+						//create two half-sized child asteroids
+						srand(time(NULL));
+						float angle1 = (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * 6.283185f;
+						float angle2 = (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * 6.283185f;
 
-					CreateNewAsteroid(angle1, i);
-					CreateNewAsteroid(angle2, i);
-
-					mAsteroids[i]->GetSize() = 2;
+						CreateNewAsteroid(angle1, j);
+						CreateNewAsteroid(angle2, j);
+					}
+					mAsteroids[j]->GetPos().first = -100.0f;
+					mAsteroids[j]->GetPos().second = -100.0f;
 				}
-				mAsteroids[i]->GetPos().first = -100.0f;
 			}
-		}
 
-		//delete any bullets that are off screen
-		if (mShip->GetBullets().size() > 0)
-		{
-			auto j = std::remove_if(mShip->GetBullets().begin(), mShip->GetBullets().end(),
-				[&](Bullet b) {return b.GetPos().first < 1 || b.GetPos().second < 1 ||
-				b.GetPos().first >= mScreenWidth || b.GetPos().second >= mScreenHeight; });
-
-			if (j != mShip->GetBullets().end())
+			//delete any bullets that are off screen
+			if (mShip->GetBullets().size() > 0)
 			{
-				mShip->GetBullets().erase(j);
+				auto j = std::remove_if(mShip->GetBullets().begin(), mShip->GetBullets().end(),
+					[&](Bullet b) {return b.GetPos().first < 1 || b.GetPos().second < 1 ||
+					b.GetPos().first >= mScreenWidth || b.GetPos().second >= mScreenHeight; });
+
+				if (j != mShip->GetBullets().end())
+				{
+					mShip->GetBullets().erase(j);
+				}
 			}
-		}
 
-		//delete any asteroids that are off screen
-		if (mAsteroids.size() > 0)
-		{
-			//we check only x axis because we move destroyed asteroids off screen by x axis
-			auto j = std::remove_if(mAsteroids.begin(), mAsteroids.end(),
-				[&](std::shared_ptr<Actor> a) {return a->GetPos().first < 1 ||
-				a->GetPos().first >= mScreenWidth; });
-
-			if (j != mAsteroids.end())
+			//delete any asteroids that are off screen
+			if (mAsteroids.size() > 0)
 			{
-				mAsteroids.erase(j);
+				//we check only x axis because we move destroyed asteroids off screen by x axis
+				auto j = std::remove_if(mAsteroids.begin(), mAsteroids.end(),
+					[&](std::shared_ptr<Actor> a) {return a->GetPos().first < 1 ||
+					a->GetPos().first >= mScreenWidth; });
+
+				if (j != mAsteroids.end())
+				{
+					mAsteroids.erase(j);
+				}
 			}
+			DrawCircle(bullet->GetPos().first, bullet->GetPos().second, 2.0f, bullet->GetColor());
 		}
-		DrawCircle(bullet->GetPos().first, bullet->GetPos().second, 2.0f, bullet->GetColor());
+
+		//copy asteroids from mNewAsteroids to mAsteroids
+		for (int i = 0; i < mNewAsteroids.size(); i++)
+		{
+			mAsteroids.push_back(mNewAsteroids[i]);
+			mNewAsteroids.erase(mNewAsteroids.begin() + i);
+		}
+
+		DrawString(20.0f, 20.0f, "Score: " + std::to_string(mScore), olc::GREEN);
+		if (mAsteroids.empty())
+		{
+			mScore += 1000;
+
+			NewLevel();
+		}
 	}
-
-	//copy asteroids from mNewAsteroids to mAsteroids
-	for (int i = 0; i < mNewAsteroids.size(); i++)
+	else if (mState == MENU)
 	{
-		mAsteroids.push_back(mNewAsteroids[i]);
+		DrawString(mMenu.mFirstBoxPos.first, mMenu.mFirstBoxPos.second, mMenu.mFirstBoxText, olc::WHITE);
+		DrawString(mMenu.mSecondBoxPos.first, mMenu.mSecondBoxPos.second, mMenu.mSecondBoxText, olc::WHITE);
 	}
-
-	DrawString(20.0f, 20.0f, "Bullets: " + std::to_string(mShip->GetBullets().size()), olc::GREEN);
-	DrawString(20.0f, 40.0f, "Asteroids: " + std::to_string(mAsteroids.size()), olc::GREEN);
-	DrawString(20.0f, 60.0f, "Asteroid 1 size: " + std::to_string(mAsteroids[0]->GetSize()), olc::GREEN);
-	DrawString(120.0f, 20.0f, "Ship x: " + std::to_string(mShip->GetPos().first) + "\n\n" + "Ship y: " +
-		std::to_string(mShip->GetPos().second), olc::GREEN);
+	else if (mState == GAMEOVER)
+	{
+		DrawString(mMenu.mFirstBoxPos.first - mMenu.mFirstBoxSize.first * 2,
+			mMenu.mFirstBoxPos.second - mMenu.mFirstBoxSize.second, "You Died", olc::DARK_RED, 3);
+	}
 	return mIsGameActive;
 }
 
@@ -170,6 +200,20 @@ void Asteroids::ProcessInput(float deltaTime)
 
 		if (GetKey(olc::Key::ESCAPE).bPressed)
 			mIsGameActive = false;
+		if (IsMouseHovered(mMenu.mFirstBoxPos, mMenu.mFirstBoxSize))
+		{
+			if (GetMouse(0).bReleased)
+			{
+				mState = ACTIVE;
+			}
+		}
+		if (IsMouseHovered(mMenu.mSecondBoxPos, mMenu.mSecondBoxSize))
+		{
+			if (GetMouse(0).bReleased)
+			{
+				mIsGameActive = false;
+			}
+		}
 		if (GetKey(olc::Key::SPACE).bReleased)
 		{
 			mShip->FireBullet();
@@ -187,6 +231,11 @@ void Asteroids::ProcessInput(float deltaTime)
 			mShip->Thrust();
 		}
 	}
+}
+
+bool Asteroids::IsMouseHovered(std::pair<float, float> pos, std::pair<float, float> size)
+{
+	return GetMouseX() >= pos.first && GetMouseX() < pos.first + size.first && GetMouseY() >= pos.second && GetMouseY() < pos.second + size.second;
 }
 
 void Asteroids::WrapCoordinates(float inx, float iny, float& ox, float& oy)
@@ -207,17 +256,42 @@ void Asteroids::CreateNewAsteroid(float rotAngle, int parentIndex)
 	int astVerts = mAsteroids[parentIndex]->GetNumOfVerts();
 	for (int i = 0; i < astVerts; i++)
 	{
-		float radius = 1.0f;
+		float radius = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 0.4 + 0.8f;
 		float a = ((float)i / (float)astVerts) * 6.28318;
 		astModel.push_back(std::pair<float, float>(radius * sin(a), radius * cos(a)));
 	}
 
-	std::shared_ptr<Actor> asteroid = std::make_shared<Actor>(mAsteroids[parentIndex]->GetPos(), mAsteroids[parentIndex]->GetVelocity(),
-		mAsteroids[parentIndex]->GetSize() / 2, astVerts, mAsteroids[parentIndex]->GetRotDir(),
+	std::shared_ptr<Actor> asteroid = std::make_shared<Actor>(mAsteroids[parentIndex]->GetPos(),
+		std::make_pair<float, float>(mAsteroids[parentIndex]->GetVelocity().first * sin(rotAngle), mAsteroids[parentIndex]->GetVelocity().second * cos(rotAngle)),
+		static_cast<int>(mAsteroids[parentIndex]->GetSize()) >> 1, astVerts, mAsteroids[parentIndex]->GetRotDir(),
 		mAsteroids[parentIndex]->GetRotationSpeed(), astModel, mAsteroids[parentIndex]->GetColor());
 
+	/*WrapCoordinates(asteroid->GetPos().first, asteroid->GetPos().second, asteroid->GetPos().first, asteroid->GetPos().second);*/
 	asteroid->GetAngle() = rotAngle;
 	mNewAsteroids.push_back(asteroid);
+}
+
+void Asteroids::NewLevel()
+{
+	std::vector<std::pair<float, float>> astModel;
+	int astVerts = 10;
+	for (int i = 0; i < astVerts; i++)
+	{
+		srand(time(NULL));
+		float radius = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 0.4 + 0.8f;
+		float a = ((float)i / (float)astVerts) * 6.28318;
+		astModel.push_back(std::pair<float, float>(radius * sin(a), radius * cos(a)));
+	}
+
+	std::shared_ptr<Actor> asteroid = std::make_shared<Actor>(std::pair<float, float>(100.0f * sin(mShip->GetAngle() - 3.14159 / 2.0f), 100.0f * cos(mShip->GetAngle() - 3.14159 / 2.0f)),
+		std::pair<float, float>(50.0f * sin(mShip->GetAngle()), 50.0f * cos(mShip->GetAngle())),
+		128.0f, 10, RIGHT, 5.0f, astModel, olc::YELLOW);
+	std::shared_ptr<Actor> asteroid1 = std::make_shared<Actor>(std::pair<float, float>(100.0f * sin(mShip->GetAngle() - 3.14159 / 2.0f), 100.0f * cos(mShip->GetAngle() - 3.14159 / 2.0f)),
+		std::pair<float, float>(50.0f * sin(-mShip->GetAngle()), 50.0f * cos(-mShip->GetAngle())),
+		128.0f, 10, RIGHT, 5.0f, astModel, olc::YELLOW);
+
+	mAsteroids.push_back(asteroid);
+	mAsteroids.push_back(asteroid1);
 }
 
 unsigned int Asteroids::GetScreenWidth() const

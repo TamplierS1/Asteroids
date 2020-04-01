@@ -25,6 +25,7 @@ Ship::Ship() : Actor()
 
 	mBulletVelocity = std::make_pair(250.0f, -250.0f);
 	mRotDir = RIGHT;
+	mDead = false;
 }
 
 Ship::Ship(std::pair<float, float> pos, std::pair<float, float> velocity,
@@ -55,6 +56,8 @@ Ship::Ship(std::pair<float, float> pos, std::pair<float, float> velocity,
 	}
 
 	mRotDir = RIGHT;
+
+	mDead = false;
 }
 
 std::pair<float, float>& Ship::GetAcceleration()
@@ -77,4 +80,9 @@ void Ship::FireBullet()
 {
 	Bullet bullet(mPos, mBulletVelocity, mAngle, olc::WHITE);
 	mBullets.push_back(bullet);
+}
+
+bool& Ship::IsDead()
+{
+	return mDead;
 }
