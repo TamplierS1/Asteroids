@@ -1,6 +1,2 @@
-Debug
-.vs
-ConsoleProject.vcxproj.filters
-ConsoleProject.vcxproj.user
-*Release
-
+build
+compile_commands.json
