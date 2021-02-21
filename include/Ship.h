@@ -3,32 +3,31 @@
 #include "Actor.h"
 #include "Bullet.h"
 
-static std::pair<float, float> gDefaultPlayerPos = std::pair<float, float>(0.0f, 0.0f);
-static std::pair<float, float> gDefaultPlayerVelocity = std::pair<float, float>(100.0f, 100.0f);
+static olc::vf2d gDefaultPlayerPos = olc::vf2d(0.0f, 0.0f);
+static olc::vf2d gDefaultPlayerVelocity = olc::vf2d(100.0f, 100.0f);
 static float gDefaultPlayerSize = 30.0f;
-static std::pair<float, float> gDefaultPlayerAcceleration = std::pair<float, float>(10.0f, 10.0f);
+static olc::vf2d gDefaultPlayerAcceleration = olc::vf2d(10.0f, 10.0f);
 static float gDefaultPlayerRotationSpeed = 5.0f;
 
 class Ship : public Actor
 {
 public:
-	Ship();
-	Ship(std::pair<float, float> pos, std::pair<float, float> velocity,
-		float size, std::pair<float, float> acceleration, float rotSpeed,
-		olc::Pixel color);
+    Ship();
+    Ship(olc::vf2d pos, olc::vf2d velocity, float size, olc::vf2d acceleration, float rotSpeed, olc::Pixel color);
 
-	std::pair<float, float>& GetAcceleration();
-	std::vector<Bullet>& GetBullets();
+    olc::vf2d& GetAcceleration();
+    std::vector<Bullet>& GetBullets();
 
-	void Thrust();
-	void FireBullet();
+    void Thrust();
+    void FireBullet();
 
-	bool& IsDead();
+    bool& IsDead();
+
 private:
-	std::vector<Bullet> mBullets;
-	std::pair<float, float> mAcceleration;
+    std::vector<Bullet> mBullets;
+    olc::vf2d mAcceleration;
 
-	std::pair<float, float> mBulletVelocity;
+    olc::vf2d mBulletVelocity;
 
-	bool mDead;
+    bool mDead;
 };

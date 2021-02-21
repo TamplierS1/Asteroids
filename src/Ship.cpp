@@ -1,88 +1,87 @@
 #include "Ship.h"
 
-Ship::Ship() : Actor()
+Ship::Ship()
+    : Actor()
 {
-	mPos = gDefaultPlayerPos;
-	mVelocity = gDefaultPlayerVelocity;
-	mSize = gDefaultPlayerSize;
-	mAcceleration = gDefaultPlayerAcceleration;
-	mDir = std::pair<float, float>(0.0f, 0.0f);
-	mColor = olc::WHITE;
+    mPos = gDefaultPlayerPos;
+    mVelocity = gDefaultPlayerVelocity;
+    mSize = gDefaultPlayerSize;
+    mAcceleration = gDefaultPlayerAcceleration;
+    mDir = olc::vf2d(0.0f, 0.0f);
+    mColor = olc::WHITE;
 
-	mAngle = 0.0f;
-	mRotationSpeed = gDefaultPlayerRotationSpeed;
+    mAngle = 0.0f;
+    mRotationSpeed = gDefaultPlayerRotationSpeed;
 
-	mNumOfVerts = 3;
+    mNumOfVerts = 3;
 
-	mModelVertices = { std::pair<float, float>(0.0f, -2.0f), std::pair<float, float>(-1.0f, +1.0f), std::pair<float, float>(+1.0f, +1.0f) };
+    mModelVertices = {olc::vf2d(0.0f, -2.0f), olc::vf2d(-1.0f, +1.0f), olc::vf2d(+1.0f, +1.0f)};
 
-	for (int i = 0; i < mNumOfVerts; i++)
-	{
-		mTransformedVertices.push_back(std::pair<float, float>(0.0f, 0.0f));
-		mTransformedVertices[i].first += mPos.first;
-		mTransformedVertices[i].second += mPos.second;
-	}
+    for (int i = 0; i < mNumOfVerts; i++)
+    {
+        mTransformedVertices.push_back(olc::vf2d(0.0f, 0.0f));
+        mTransformedVertices[i].x += mPos.x;
+        mTransformedVertices[i].y += mPos.y;
+    }
 
-	mBulletVelocity = std::make_pair(250.0f, -250.0f);
-	mRotDir = RIGHT;
-	mDead = false;
+    mBulletVelocity = olc::vf2d(250.0f, -250.0f);
+    mRotDir = RotationDir::RIGHT;
+    mDead = false;
 }
 
-Ship::Ship(std::pair<float, float> pos, std::pair<float, float> velocity,
-	float size, std::pair<float, float> acceleration, float rotSpeed,
-	olc::Pixel color)
+Ship::Ship(olc::vf2d pos, olc::vf2d velocity, float size, olc::vf2d acceleration, float rotSpeed, olc::Pixel color)
 {
-	mPos = pos;
-	mVelocity = velocity;
-	mSize = size;
-	mAcceleration = acceleration;
-	mDir = std::pair<float, float>(0.0f, 0.0f);
-	mColor = color;
+    mPos = pos;
+    mVelocity = velocity;
+    mSize = size;
+    mAcceleration = acceleration;
+    mDir = olc::vf2d(0.0f, 0.0f);
+    mColor = color;
 
-	mAngle = 0.0f;
-	mRotationSpeed = rotSpeed;
+    mAngle = 0.0f;
+    mRotationSpeed = rotSpeed;
 
-	mNumOfVerts = 3;
+    mNumOfVerts = 3;
 
-	mModelVertices = { std::pair<float, float>(0.0f, -2.0f), std::pair<float, float>(-1.0f, +1.0f), std::pair<float, float>(+1.0f, +1.0f) };
+    mModelVertices = {olc::vf2d(0.0f, -2.0f), olc::vf2d(-1.0f, +1.0f), olc::vf2d(+1.0f, +1.0f)};
 
-	mBulletVelocity = std::make_pair(350.0f, -350.0f);
+    mBulletVelocity = olc::vf2d(350.0f, -350.0f);
 
-	for (int i = 0; i < mNumOfVerts; i++)
-	{
-		mTransformedVertices.push_back(std::pair<float, float>(0.0f, 0.0f));
-		mTransformedVertices[i].first += mPos.first;
-		mTransformedVertices[i].second += mPos.second;
-	}
+    for (int i = 0; i < mNumOfVerts; i++)
+    {
+        mTransformedVertices.push_back(olc::vf2d(0.0f, 0.0f));
+        mTransformedVertices[i].x += mPos.x;
+        mTransformedVertices[i].y += mPos.y;
+    }
 
-	mRotDir = RIGHT;
+    mRotDir = RotationDir::RIGHT;
 
-	mDead = false;
+    mDead = false;
 }
 
-std::pair<float, float>& Ship::GetAcceleration()
+olc::vf2d& Ship::GetAcceleration()
 {
-	return mAcceleration;
+    return mAcceleration;
 }
 
 std::vector<Bullet>& Ship::GetBullets()
 {
-	return mBullets;
+    return mBullets;
 }
 
 void Ship::Thrust()
 {
-	mVelocity.first += sin(mAngle) * mAcceleration.first;
-	mVelocity.second += -cos(mAngle) * mAcceleration.second;
+    mVelocity.x += sin(mAngle) * mAcceleration.x;
+    mVelocity.y += -cos(mAngle) * mAcceleration.y;
 }
 
 void Ship::FireBullet()
 {
-	Bullet bullet(mPos, mBulletVelocity, mAngle, olc::WHITE);
-	mBullets.push_back(bullet);
+    Bullet bullet(mPos, mBulletVelocity, mAngle, olc::WHITE);
+    mBullets.push_back(bullet);
 }
 
 bool& Ship::IsDead()
 {
-	return mDead;
+    return mDead;
 }

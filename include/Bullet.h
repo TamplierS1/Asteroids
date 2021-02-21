@@ -2,15 +2,15 @@
 
 #include "Actor.h"
 
-class Bullet :
-	public Actor
+class Bullet : public Actor
 {
 public:
-	Bullet(std::pair<float, float> pos, std::pair<float, float> velocity, float playerAngle, olc::Pixel color);
+    Bullet(olc::vf2d pos, olc::vf2d velocity, float playerAngle, olc::Pixel color);
 
-	void MoveBullet(float fElapsedTime);
-	bool Collision(unsigned int width, unsigned int height);
+    void MoveBullet(float fElapsedTime);
+    bool Collision(unsigned int width, unsigned int height);
+
 private:
-	//specifies the angle at which the bullet should be shot
-	float mAngle;
+    // specifies the angle at which the bullet should be shot
+    float mAngle;
 };

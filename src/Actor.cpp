@@ -1,84 +1,84 @@
 #include "Actor.h"
 
-std::pair<float, float>& Actor::GetPos()
+olc::vf2d& Actor::GetPos()
 {
-	return mPos;
+    return mPos;
 }
 
-std::pair<float, float>& Actor::GetVelocity()
+olc::vf2d& Actor::GetVelocity()
 {
-	return mVelocity;
+    return mVelocity;
 }
 
 float& Actor::GetSize()
 {
-	return mSize;
+    return mSize;
 }
 
-std::pair<float, float>& Actor::GetDirection()
+olc::vf2d& Actor::GetDirection()
 {
-	return mDir;
+    return mDir;
 }
 
 float& Actor::GetAngle()
 {
-	return mAngle;
+    return mAngle;
 }
 
-std::pair<float, float> Actor::GetTransformedVertex(int number)
+olc::vf2d Actor::GetTransformedVertex(int number)
 {
-	return mTransformedVertices[number];
+    return mTransformedVertices[number];
 }
 
 unsigned int Actor::GetNumOfVerts()
 {
-	return mNumOfVerts;
+    return mNumOfVerts;
 }
 
 olc::Pixel Actor::GetColor() const
 {
-	return mColor;
+    return mColor;
 }
 
 void Actor::Move(float deltaTime)
 {
-	mPos.first += mVelocity.first * deltaTime;
-	mPos.second += mVelocity.second * deltaTime;
+    mPos.x += mVelocity.x * deltaTime;
+    mPos.y += mVelocity.y * deltaTime;
 
-	//translate
-	for (int i = 0; i < mNumOfVerts; i++)
-	{
-		mTransformedVertices[i].first += mPos.first;
-		mTransformedVertices[i].second += mPos.second;
-	}
+    // translate
+    for (int i = 0; i < mNumOfVerts; i++)
+    {
+        mTransformedVertices[i].x += mPos.x;
+        mTransformedVertices[i].y += mPos.y;
+    }
 }
 
 void Actor::Rotate(float deltaTime)
 {
-	//rotate
-	for (int i = 0; i < mNumOfVerts; i++)
-	{
-		mTransformedVertices[i].first = mModelVertices[i].first * cos(mAngle) - mModelVertices[i].second * sin(mAngle);
-		mTransformedVertices[i].second = mModelVertices[i].first * sin(mAngle) + mModelVertices[i].second * cos(mAngle);
-	}
+    // rotate
+    for (int i = 0; i < mNumOfVerts; i++)
+    {
+        mTransformedVertices[i].x = mModelVertices[i].x * cos(mAngle) - mModelVertices[i].y * sin(mAngle);
+        mTransformedVertices[i].y = mModelVertices[i].x * sin(mAngle) + mModelVertices[i].y * cos(mAngle);
+    }
 }
 
 void Actor::ChangeRotation(RotationDir dir, float deltaTime)
 {
-	mAngle += mRotationSpeed * dir * deltaTime;
+    mAngle += mRotationSpeed * int(dir) * deltaTime;
 }
 
 void Actor::Scale(float amount)
 {
-	for (int i = 0; i < mNumOfVerts; i++)
-	{
-		mTransformedVertices[i].first *= amount;
-	}
+    for (int i = 0; i < mNumOfVerts; i++)
+    {
+        mTransformedVertices[i].x *= amount;
+    }
 
-	for (int i = 0; i < mNumOfVerts; i++)
-	{
-		mTransformedVertices[i].second *= amount;
-	}
+    for (int i = 0; i < mNumOfVerts; i++)
+    {
+        mTransformedVertices[i].y *= amount;
+    }
 }
 
 Actor::Actor()
@@ -87,35 +87,34 @@ Actor::Actor()
 
 float Actor::GetRotationSpeed()
 {
-	return mRotationSpeed;
+    return mRotationSpeed;
 }
 
 RotationDir Actor::GetRotDir()
 {
-	return mRotDir;
+    return mRotDir;
 }
 
-Actor::Actor(std::pair<float, float> pos, std::pair<float, float> velocity,
-	float size, unsigned int verts, RotationDir rotDir, float rotSpeed,
-	std::vector<std::pair<float, float>> modelVerts, olc::Pixel color)
+Actor::Actor(olc::vf2d pos, olc::vf2d velocity, float size, unsigned int verts, RotationDir rotDir, float rotSpeed,
+             std::vector<olc::vf2d> modelVerts, olc::Pixel color)
 {
-	mNumOfVerts = verts;
-	mModelVertices = modelVerts;
-	mColor = color;
-	mPos = pos;
-	mVelocity = velocity;
-	mSize = size;
-	mDir = std::pair<float, float>(0.0f, 0.0f);
+    mNumOfVerts = verts;
+    mModelVertices = modelVerts;
+    mColor = color;
+    mPos = pos;
+    mVelocity = velocity;
+    mSize = size;
+    mDir = olc::vf2d(0.0f, 0.0f);
 
-	mAngle = 0.0f;
-	mRotationSpeed = rotSpeed;
+    mAngle = 0.0f;
+    mRotationSpeed = rotSpeed;
 
-	for (int i = 0; i < mNumOfVerts; i++)
-	{
-		mTransformedVertices.push_back(std::pair<float, float>(0.0f, 0.0f));
-		mTransformedVertices[i].first += mPos.first;
-		mTransformedVertices[i].second += mPos.second;
-	}
+    for (int i = 0; i < mNumOfVerts; i++)
+    {
+        mTransformedVertices.push_back(olc::vf2d(0.0f, 0.0f));
+        mTransformedVertices[i].x += mPos.x;
+        mTransformedVertices[i].y += mPos.y;
+    }
 
-	mRotDir = RIGHT;
+    mRotDir = rotDir;
 }

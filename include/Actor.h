@@ -6,7 +6,7 @@
 
 #include "olcPixelGameEngine.h"
 
-enum RotationDir
+enum class RotationDir
 {
     LEFT = -1,
     RIGHT = 1,
@@ -16,18 +16,18 @@ enum RotationDir
 class Actor
 {
 public:
-    Actor(std::pair<float, float> pos, std::pair<float, float> velocity, float size, unsigned int verts,
-          RotationDir rotDir, float rotSpeed, std::vector<std::pair<float, float>> modelVerts, olc::Pixel color);
+    Actor(olc::vf2d pos, olc::vf2d velocity, float size, unsigned int verts, RotationDir rotDir, float rotSpeed,
+          std::vector<olc::vf2d> modelVerts, olc::Pixel color);
     // utility functions
-    std::pair<float, float>& GetPos();
-    std::pair<float, float>& GetVelocity();
+    olc::vf2d& GetPos();
+    olc::vf2d& GetVelocity();
     float& GetSize();
 
-    std::pair<float, float>& GetDirection();
+    olc::vf2d& GetDirection();
     float GetRotationSpeed();
     RotationDir GetRotDir();
     float& GetAngle();
-    std::pair<float, float> GetTransformedVertex(int number);
+    olc::vf2d GetTransformedVertex(int number);
     unsigned int GetNumOfVerts();
     olc::Pixel GetColor() const;
 
@@ -39,13 +39,13 @@ public:
 protected:
     Actor();
 
-    std::pair<float, float> mPos;
-    std::pair<float, float> mVelocity;
+    olc::vf2d mPos;
+    olc::vf2d mVelocity;
     float mSize;
-    std::pair<float, float> mDir;
+    olc::vf2d mDir;
 
-    std::vector<std::pair<float, float>> mTransformedVertices;
-    std::vector<std::pair<float, float>> mModelVertices;
+    std::vector<olc::vf2d> mTransformedVertices;
+    std::vector<olc::vf2d> mModelVertices;
     unsigned int mNumOfVerts;
 
     olc::Pixel mColor;

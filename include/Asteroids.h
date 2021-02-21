@@ -15,11 +15,11 @@ enum GAME_STATE
 
 struct Menu
 {
-    std::pair<float, float> mFirstBoxPos;
-    std::pair<float, float> mFirstBoxSize;
+    olc::vf2d mFirstBoxPos;
+    olc::vf2d mFirstBoxSize;
 
-    std::pair<float, float> mSecondBoxPos;
-    std::pair<float, float> mSecondBoxSize;
+    olc::vf2d mSecondBoxPos;
+    olc::vf2d mSecondBoxSize;
 
     std::string mFirstBoxText;
     std::string mSecondBoxText;
@@ -36,9 +36,9 @@ public:
     virtual bool Draw(int32_t x, int32_t y, olc::Pixel p) override;
     void DrawActor(Actor &actor, olc::Pixel color);
     // check collision between a point and a circle
-    bool CheckCollisions(std::pair<float, float> circlePos, float circleRad, std::pair<float, float> pointPos);
+    bool CheckCollisions(olc::vf2d circlePos, float circleRad, olc::vf2d pointPos);
     void ProcessInput(float deltaTime);
-    bool IsMouseHovered(std::pair<float, float> pos, std::pair<float, float> size);
+    bool IsMouseHovered(olc::vf2d pos, olc::vf2d size);
     // takes as input a set of coordinates and transforms them if they are out of
     // the screen
     void WrapCoordinates(float inx, float iny, float &ox, float &oy);
